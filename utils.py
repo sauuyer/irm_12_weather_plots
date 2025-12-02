@@ -20,7 +20,72 @@ import matplotlib.pyplot as plt
 
 
 # +
+def md2vect(wspd, wdir):
+    """Calculate north and east wind vectors from magnitude and direction
 
+    Parameters
+    ----------
+    wspd: array-like
+        Absolute wind speeds (m/s)
+    wdir: array-like
+        Wind directions (degrees). Values will be wrapped into [0, 360).
+
+    Returns
+    -------
+    vx: numpy.ndarray
+        Northerly wind component (same shape as wspd)
+    vy: numpy.ndarray
+        Easterly wind component (same shape as wspd)
+    """
+    # Ensure NumPy arrays (avoid pandas SettingWithCopyWarning)
+    wspd = np.asarray(wspd, dtype=float)
+    wdir = np.asarray(wdir, dtype=float)
+
+    # Wrap angles into [0, 360)
+    wdir = np.mod(wdir, 360.0)
+
+    # Convert to radians
+    wdir_rad = np.deg2rad(wdir)
+
+    # Calculate northerly and easterly wind vectors
+    vx = wspd * np.sin(wdir_rad)  # north component
+    vy = wspd * np.cos(wdir_rad)  # east component
+
+    return vx, vy
+
+
+def vect2md(vx, vy):
+    """Calculate the wind speed and direction from north and east wind vectors.
+
+    Parameters
+    ----------
+    vx: array-like
+        Northerly wind component
+    vy: array-like
+        Easterly wind component
+
+    Returns
+    -------
+    wspd: numpy.ndarray
+        Absolute wind speeds (m/s)
+    wdir: numpy.ndarray
+        Directions (degrees) in [0, 360)
+        (direction the vector points TOWARD, clockwise from north)
+    """
+    # Ensure NumPy arrays
+    vx = np.asarray(vx, dtype=float)
+    vy = np.asarray(vy, dtype=float)
+
+    # Speed
+    wspd = np.sqrt(vx**2 + vy**2)
+
+    # Direction in degrees, range [-180, 180]
+    wdir = np.degrees(np.arctan2(vx, vy))
+
+    # Wrap into [0, 360)
+    wdir = np.mod(wdir, 360.0)
+
+    return wspd, wdir
 
 
 def bpr_adjust(bpr,atmp,zbpr,znew):
